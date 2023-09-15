@@ -1,0 +1,46 @@
+version: '2'
+
+networks:
+  reciprocal-borrowing-network:
+    driver: bridge
+services:
+  openldap:
+    image: bitnami/openldap:2.5.16
+    container_name: openldap
+    ports:
+      - '1389:1389'
+      - '1636:1636'
+    environment:
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=adminpassword
+      - LDAP_CUSTOM_LDIF_DIR=/ldifs
+      # - BITNAMI_DEBUG=true
+    networks:
+      - reciprocal-borrowing-network
+    volumes:
+      - 'openldap_data:/bitnami/openldap'
+      - './ldap/ldifs:/ldifs'
+  shib-idp:
+    container_name: shib-idp
+    build:
+      context: idp
+      dockerfile: Dockerfile
+    ports:
+      - '1443:443'
+    networks:
+      - reciprocal-borrowing-network
+  borrow-local:
+    image: shib-sp-reciprocal-borrowing:latest
+    container_name: borrow-local
+    ports:
+      - '80:80'
+      - '443:443'
+    networks:
+      - reciprocal-borrowing-network
+
+  #   image: 'YOUR_APPLICATION_IMAGE'
+  #   networks:
+  #     - my-network
+volumes:
+  openldap_data:
+    driver: local

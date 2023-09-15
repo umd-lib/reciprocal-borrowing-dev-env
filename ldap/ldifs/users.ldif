@@ -1,0 +1,17 @@
+dn: dc=example,dc=org
+dc: example
+objectClass: dcObject
+objectClass: organization
+o: Example Organization
+
+dn: ou=users,dc=example,dc=org
+ou: users
+objectClass: organizationalunit
+
+dn: cn=customuser,ou=users,dc=example,dc=org
+objectClass: inetOrgPerson
+cn: customuser
+cn: User1
+sn: Bar1
+uid: customuser
+userPassword: custompassword
