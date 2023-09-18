@@ -320,6 +320,14 @@ The following files were modified to support the configuration expected by
 Reciprocal Borrowing. The original version of the files have a ".dist"
 extension.
 
+#### sp/container_files/shibboleth/attribute-map.xml
+
+Modified to return the "eduPersonEntitlement" as "eduPersonEntitlement",
+instead of as "entitlement".
+
+The "eduPersonEntitlement" key is what is used by Reciprocal Borrowing to
+identify users authorized to borrow.
+
 #### sp/container_files/shibboleth2.xml
 
 This added file configures the SP to talk to the IdP.
