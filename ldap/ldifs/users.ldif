@@ -8,10 +8,18 @@ dn: ou=users,dc=example,dc=org
 ou: users
 objectClass: organizationalunit
 
-dn: cn=customuser,ou=users,dc=example,dc=org
+dn: cn=is_eligible,ou=users,dc=example,dc=org
 objectClass: inetOrgPerson
-cn: customuser
-cn: User1
-sn: Bar1
-uid: customuser
-userPassword: custompassword
+cn: is_eligible
+givenName: Is
+sn: User
+uid: is_eligible
+userPassword: password
+
+dn: cn=not_eligible,ou=users,dc=example,dc=org
+objectClass: inetOrgPerson
+cn: not_eligible
+givenName: Not
+sn: Eligible
+uid: not_eligible
+userPassword: password

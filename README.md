@@ -143,7 +143,7 @@ OpenLDAP server:
 
 | Username   | Password       |
 | ---------- | -------------- |
-| adminuser  | adminpassword |
+| adminuser  | adminpassword  |
 
 ### Custom Users
 
@@ -151,9 +151,10 @@ The OpenLdap instance reads in the LDIF files in the "ldap/ldif" directory.
 
 The following users are available:
 
-| Username   | Password       |
-| ---------- | -------------- |
-| customuser | custompassword |
+| Username      | Password | Note                                        |
+| ------------- | -------- | ------------------------------------------- |
+| is_eligible   | password | This user is eligible for borrowing         |
+| not_eligible  | password | This user is **not** eligible for borrowing |
 
 ### LDIF Files
 
