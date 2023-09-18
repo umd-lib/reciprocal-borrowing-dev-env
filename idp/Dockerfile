@@ -1,4 +1,4 @@
-FROM tier/shib-idp:latest
+FROM tier/shib-idp:4.3.1_20230818
 
 # The build args below can be used at build-time to tell the build process where to find your config files.  This is for a completely burned-in config.
 ARG TOMCFG=config/tomcat

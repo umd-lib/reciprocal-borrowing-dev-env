@@ -93,12 +93,6 @@ RUN yum update -y && \
     yum install -y mod_passenger || { yum-config-manager --enable cr && sudo yum install -y mod_passenger ; } && \
     yum clean all
 
-# Install Reciprocal Borrowing
-RUN git clone https://github.com/umd-lib/reciprocal-borrowing.git && \
-    cd reciprocal-borrowing && \
-    source ~/.bashrc && \
-    rbenv global 3.2.2 && \
-    gem install bundler && \
-    bundle config set force_ruby_platform true && \
-    bundle install && \
-    sed -i '/config.file_watcher/d' config/environments/development.rb
+# Set permissions to /root to enable Apache to access it
+RUN chmod 755 /root
+

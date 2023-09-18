@@ -37,6 +37,8 @@ services:
       - '443:443'
     networks:
       - reciprocal-borrowing-network
+    volumes:
+      - '../reciprocal-borrowing:/root/reciprocal-borrowing'
 
   #   image: 'YOUR_APPLICATION_IMAGE'
   #   networks:

@@ -12,9 +12,11 @@ This environment provides configured instances of the following applications:
 * Shibboleth Identity Provider (IdP)
 * Shibboleth Service Provider (SP)
 
-## Prerequisites
+## Development Environment Setup
 
-1) Edit the “/etc/hosts” file on the local workstation:
+### 1) Prerequisites
+
+1.1) Edit the “/etc/hosts” file on the local workstation:
 
 ```zsh
 sudo vi /etc/hosts
@@ -26,6 +28,99 @@ and add the following entries:
 127.0.0.1       shib-idp
 127.0.0.1       borrow-local
 ```
+
+### 2) Repository Setup
+
+2.1) In a base directory, clone this repository:
+
+```zsh
+$ git clone git@github.com:umd-lib/reciprocal-borrowing-dev-env.git
+```
+
+2.2) In the same base directory, clone the "reciprocal-borrowing" repository:
+
+```zsh
+$ git clone git@github.com:umd-lib/reciprocal-borrowing.git
+```
+
+### 3) Docker Image Setup
+
+3.1) Switch into the "reciprocal-borrowing-dev-en" and run the following command
+     to build the "shib-sp-reciprocal-borrowing:latest" Docker image using
+     Kubernetes:
+
+```zsh
+$ cd reciprocal-borrowing-dev-env
+$ docker buildx build --no-cache --progress=plain --builder kube --platform linux/amd64 -t shib-sp-reciprocal-borrowing --load -f sp/Dockerfile sp/.
+```
+
+**Note:** This build takes approximately 10 minutes.
+
+### 4) Docker stack setup
+
+4.1) Start the Docker stack:
+
+```zsh
+$ docker compose up
+```
+
+4.2) Once the Docker stack has started, run a Bash shell in the "borrow-local"
+     container:
+
+```zsh
+$ docker exec -it borrow-local /bin/bash
+```
+
+4.3) In the "borrow-local" container, run the following commands to install the
+     gems needed for the Reciprocal Borrowing application:
+
+```bash
+$ cd /root/reciprocal-borrowing
+$ bundle config set force_ruby_platform true
+$ bundle config set --local path 'vendor/bundle'
+$ bundle install
+```
+
+**Note:** Installing the gems (especially the "bootstrap-sass" gem) will take
+approximately 20 minutes. The gems will be stored in the "vendor/bundle"
+directory of the "reciprocal-borrowing" checkout, so they will still be present
+even if the "borrow-local" Docker container restarts.
+
+### 5) Accessing the application
+
+5.1) To access the application, in a web browser, go to:
+
+<https://borrow-local/>
+
+The browser may display a warning message related to unsigned certificates.
+Accept the self-signed cerificate, and the Reciprocal Borrowing home page will
+be shown.
+
+5.2) On the Reciprocal Borrowing home page, select any institution *except* for
+     the "University of Maryland" as the lending instituion. The second
+     Reciprocal Borrowing page will be shown.
+
+5.3) On the second Reciprocal Borrowing page, select "University of Maryland" as
+     the authenticating institution.
+
+  After selecting the authenticating insitution, the browser may display a
+  warning message related to unsigned certificates. Accept the self-signed
+  cerificate, and the login page from the IdP will be shown.
+
+5.4) On the login page, enter the username and password, and left-click the
+    "Login" button.
+
+5.5) The Reciprocal Borrowing result page will be shown indicating whether or
+     not the user is authorized to borrow.
+
+## Gem Installation
+
+The Ruby gems are installed into a "vendor/bundle" directory of the Reciprocal
+Borrowing application. This enables them to still be in place after restarting
+the "borrow-local" container.
+
+The gems are configured to use the "amd64" archictecture, and so are not
+directly usable on an M-series laptop, outside of the Docker container.
 
 ## Docker Compose
 
@@ -221,6 +316,12 @@ extension.
 
 This added file configures the SP to talk to the IdP.
 
+#### sp/container_files/httpd/00-virtualhosts.conf
+
+Modified the Apache/Phusion Passenger configuration to use the
+"development_docker" Rails environment, and to enable the "Reciprocal Borrowing"
+application to be placed in the "/root" directory of the SP container.
+
 #### Self-signed certificate files
 
 The following files were generated in an initial run of the stock SP Docker
@@ -276,7 +377,22 @@ $ docker cp borrow-local:/etc/shibboleth/sp-signing-key.pem sp/container_files/s
 
 ### Shibboleth SP changes
 
-#### sp/container_files/httpd/00-virtualhosts.conf
 
 ### sp/Dockerfile
 
+
+## Helpful Commands
+
+In the "borrow-local" Docker container:
+
+### Restart Apache
+
+```bash
+$ supervisorctl restart httpd
+```
+
+### Restart Passenger/reciprocal-borrowing
+
+```bash
+$ passenger-config restart-app /root/reciprocal-borrowing
+```
