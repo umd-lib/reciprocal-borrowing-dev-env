@@ -29,7 +29,7 @@ and add the following entries:
 127.0.0.1       borrow-local
 ```
 
-### 2) Repository Setup
+### 2) Application Setup
 
 2.1) In a base directory, clone this repository:
 
@@ -43,36 +43,28 @@ $ git clone git@github.com:umd-lib/reciprocal-borrowing-dev-env.git
 $ git clone git@github.com:umd-lib/reciprocal-borrowing.git
 ```
 
-### 3) Docker Image Setup
+### 3) Running the Application
 
-3.1) Switch into the "reciprocal-borrowing-dev-en" and run the following command
-     to build the "shib-sp-reciprocal-borrowing:latest" Docker image using
-     Kubernetes:
+The following steps assume that a suitable Shibboleth SP Docker image has been
+created, containing a Ruby version compatible with the Reciprocal Borrowing
+application being developed. See below for information about creating
+a Shibboleth SP Docker image.
 
-```zsh
-$ cd reciprocal-borrowing-dev-env
-$ docker buildx build --no-cache --progress=plain --builder kube --platform linux/amd64 -t shib-sp-reciprocal-borrowing --load -f sp/Dockerfile sp/.
-```
-
-**Note:** This build takes approximately 10 minutes.
-
-### 4) Docker stack setup
-
-4.1) Start the Docker stack:
+3.1) Start the Docker stack:
 
 ```zsh
 $ docker compose up
 ```
 
-4.2) Once the Docker stack has started, run a Bash shell in the "borrow-local"
-     container:
+3.2) Once the Docker stack has started, run a Bash shell in the "borrow-local"
+container:
 
 ```zsh
 $ docker exec -it borrow-local /bin/bash
 ```
 
-4.3) In the "borrow-local" container, run the following commands to install the
-     gems needed for the Reciprocal Borrowing application:
+3.3) In the "borrow-local" container, run the following commands to install the
+gems needed for the Reciprocal Borrowing application:
 
 ```bash
 borrow-local$ cd /root/reciprocal-borrowing
@@ -81,14 +73,19 @@ borrow-local$ bundle config set --local path 'vendor/bundle'
 borrow-local$ bundle install
 ```
 
-**Note:** Installing the gems (especially the "bootstrap-sass" gem) will take
-approximately 20 minutes. The gems will be stored in the "vendor/bundle"
-directory of the "reciprocal-borrowing" checkout, so they will still be present
-even if the "borrow-local" Docker container restarts.
+---
+**Note:** Installing the gems will take approximately 10-20 minutes, but are
+stored in the "vendor" directory of the Reciprocal Borrowing application, so
+the gems will still be available after stopping and restarting tje Shibboleth SP
+"borrow-local"container.
 
-### 5) Accessing the application
+The gems are configured to use the "amd64" archictecture, and so are not
+directly usable on an M-series laptop, outside of the Docker container.
 
-5.1) To access the application, in a web browser, go to:
+---
+
+3.2) Access the application in a web browser by
+going to, go to:
 
 <https://borrow-local/>
 
@@ -96,31 +93,146 @@ The browser may display a warning message related to unsigned certificates.
 Accept the self-signed cerificate, and the Reciprocal Borrowing home page will
 be shown.
 
-5.2) On the Reciprocal Borrowing home page, select any institution *except* for
-     the "University of Maryland" as the lending instituion. The second
-     Reciprocal Borrowing page will be shown.
+3.3) On the Reciprocal Borrowing home page, select any institution *except* for
+the "University of Maryland" as the lending instituion. The second
+Reciprocal Borrowing page will be shown.
 
-5.3) On the second Reciprocal Borrowing page, select "University of Maryland" as
-     the authenticating institution.
+3.4) On the second Reciprocal Borrowing page, select "University of Maryland" as
+the authenticating institution.
 
-  After selecting the authenticating insitution, the browser may display a
-  warning message related to unsigned certificates. Accept the self-signed
-  cerificate, and the login page from the IdP will be shown.
+After selecting the authenticating insitution, the browser may display a
+warning message related to unsigned certificates. Accept the self-signed
+cerificate, and the login page from the IdP will be shown.
 
-5.4) On the login page, enter the username and password, and left-click the
-    "Login" button.
+3.5) On the login page, enter the username and password, such as:
 
-5.5) The Reciprocal Borrowing result page will be shown indicating whether or
-     not the user is authorized to borrow.
+* Username: `is_eligible`
+* Password: `password`
 
-## Gem Installation
+and left-click the "Login" button. See the "Custom Users" section below for
+additional users and credentials.
 
-The Ruby gems are installed into a "vendor/bundle" directory of the Reciprocal
-Borrowing application. This enables them to still be in place after restarting
-the "borrow-local" container.
+5.5) The Reciprocal Borrowing result page will be shown indicating that the user
+is able to borrow.
 
-The gems are configured to use the "amd64" archictecture, and so are not
-directly usable on an M-series laptop, outside of the Docker container.
+Development can be done in the "reciprocal-borrowing" directory on the local
+workstation. The file changes will be automatically copied into the Shibboleth
+SP Docker container.
+
+## Helpful Commands
+
+The following commands can be run in the Shibboleth SP "borrow-local" Docker
+container, which can be accessed by running:
+
+```zsh
+$ docker exec -it borrow-local /bin/bash
+```
+
+### Restart Apache
+
+To restart Apache after making changes to the Apache configuration, run:
+
+```bash
+borrow-local$ supervisorctl restart httpd
+```
+
+### Restart Passenger/reciprocal-borrowing
+
+The "reciprocal-borrowing" repository can be edited on the local machine, and
+the changes will be automatically propagated to the Docker container and
+reflected in the running Rails application, as in normal Rails development.
+
+Some Rails changes, such as changes to the configuration or internationalization
+files require the Rails application to be restarted, which can be done by
+running the following command (in the "borrow-local" Docker container):
+
+```bash
+borrow-local$ passenger-config restart-app /root/reciprocal-borrowing
+```
+
+**Note:** Normal Rails development changes (i.e., changes to the application
+views and controllers) should be picked up automatically (as if running in the
+local development environment).
+
+## Shibboleth SP Docker Image Setup
+
+The "sp" subdirectory contains a snapshot (from
+<https://github.internet2.edu/docker/shib-sp/commit/fd224256ffb0e4c8949a95f1e562b533628d4fa7>)
+of a Shibboleth SP Docker image setup configuration.
+
+The "Dockerfile" from the snapshot has been modified to include Ruby and the
+Phusion Passenger web application server.
+
+The "docker-compose.yml" file has been modified to mount the local
+"reciprocal-borrowing" directory into the container to enable local development.
+
+The Shibboleth SP Docker image should be recreated whenever:
+
+* The Ruby version used by the "reciprocal-borrowing" application is updated
+* As needed, to keep up with any Shibboleth SP or Phuson Passenger version
+  changes used in production.
+
+The following instructions use that the Kubernetes "build" environment to
+construct an "amd64" Docker image (which is currently necessary, as Phusion
+Passenger does not have an "arm64" build).
+
+For more information about setting up the Kubernetes "build" environment, see
+<https://github.com/umd-lib/k8s/blob/main/docs/DockerBuilds.md> in Confluence.
+
+1) Switch into the "reciprocal-borrowing-dev-env" directory:
+
+```zsh
+$ cd reciprocal-borrowing-dev-env
+```
+
+2) Run the following command to build the "shib-sp-reciprocal-borrowing:\<TAG>"
+   Docker image where \<TAG> is the Docker image tag to create:
+
+```zsh
+$ docker buildx build --no-cache --progress=plain --builder kube  --load \
+  --platform linux/amd64 -f sp/Dockerfile \
+  -t docker.lib.umd.edu/shib-sp-reciprocal-borrowing:<TAG> sp/.
+```
+
+For example, if the \<TAG> is "ruby-3.2.2" than the commmand would be:
+
+```zsh
+$ docker buildx build --no-cache --progress=plain --builder kube  --load \
+  --platform linux/amd64 -f sp/Dockerfile \
+  -t docker.lib.umd.edu/shib-sp-reciprocal-borrowing:ruby-3.2.2 sp/.
+```
+
+This build takes approximately 10 minutes. The "--load" flag is used to ensure
+that the resulting "shib-sp-reciprocal-borrowing" Docker image is loaded on the
+local workstation, and *not* pushed to the Nexus.
+
+---
+**Note:** The version of Phusion Passenger is not "pinned" and is installed
+via the "yum" package manager, so its version may differ over time. The
+current Dockerfile configuration was derived from the instructions at
+<https://www.phusionpassenger.com/docs/advanced_guides/install_and_upgrade/apache/install/oss/el8.html>.
+
+The current recommendation is to label the Docker image using the Ruby version,
+as that is the most likely reason for updating the Docker image.
+
+---
+
+3) After creating the Docker image, update the "borrow-local" container in the
+   "docker-compose.yml" file to use the new image.
+
+4) Test the image by running the Docker Compose stack. If everything is working,
+   push the Docker image to the Nexus, using the following command
+   (where \<TAG>) is the tag of the Docker image:
+
+```zsh
+$ docker push docker.lib.umd.edu/shib-sp-reciprocal-borrowing:<TAG>
+```
+
+For example, if the \<TAG> is "ruby-3.2.2", then the command would be:
+
+```zsh
+$ docker push docker.lib.umd.edu/shib-sp-reciprocal-borrowing:ruby-3.2.2
+```
 
 ## Docker Compose
 
@@ -130,8 +242,8 @@ All application run on a Docker "reciprocal-borrowing-network" internal network.
 
 ## OpenLDAP
 
-The OpenLDAP implementation uses the "bitnami/openldap" Docker image
-(<https://hub.docker.com/r/bitnami/openldap>).
+The OpenLDAP implementation uses a stock "bitnami/openldap" Docker image
+(<https://hub.docker.com/r/bitnami/openldap>) pulled from Docker Hub.
 
 The OpenLDAP server runs on ports 1389 and 1636, and is available using the
 "openldap" hostname.
@@ -203,6 +315,9 @@ implementation (see
 with additional information available at
 <https://docs.google.com/document/d/17-0O3Tvty9PONL6wu4PiC6ZWramdyntXmOsq1UpD2tE/edit>.
 
+The IdP Docker image in built as part of the Docker Compose start up, utilizing
+the configuration files present in the "idp" subdirectory.
+
 ### IdP Dockerfile and Configuration
 
 The contents of the "idp" subdirectory were initially created using the
@@ -269,31 +384,17 @@ In a web browser go to
 
 <https://shib-idp:1443/idp/profile/admin/hello>
 
-Should be able to login using `customuser` with a password of `custompassword`.
+Should be able to login using `is_eligible` with a password of `password`.
 
-## Shibboleth Service Provide (SP)/Reciprocal Borrowing
-
-## Building the SP/Recirpocal Borrowing Docker image
-
-On an M-series (Apple Silicon) laptop, the SP/Reciprocal Borrowing Docker
-image *must* be built in using Kubernetes. This is because the Phusion Passenger
-application server uses to connect Apache to Rails is only available in an
-"amd64" version.
-
-To build the "shib-sp-reciprocal-borrowing" Docker image:
-
-```zsh
-$ docker buildx build --no-cache --progress=plain --builder kube --platform linux/amd64 -t shib-sp-reciprocal-borrowing --load -f sp/Dockerfile sp/.
-```
-
-The "--load" flag ensure that the "shib-sp-reciprocal-borrowing" Docker image
-is loaded to the local workstation, and *not* pushed to the Nexus.
+## Shibboleth Service Provider (SP)/Reciprocal Borrowing
 
 ## SP Dockerfile and Configuration
 
 The contents of the "sp" directory were generated from the
-"3.4.1_06122023_rocky8_multiarch" tag of the
-<https://github.internet2.edu/docker/shib-sp.git> Git repository.
+"3.4.1_06122023_rocky8_multiarch" branch of the
+<https://github.internet2.edu/docker/shib-sp.git> Git repository,
+specifically Git hash
+"[1b51145b510b11380702c36d7b163a1b9dfbca3f](https://github.internet2.edu/docker/shib-sp/commit/1b51145b510b11380702c36d7b163a1b9dfbca3f)".
 
 The ".git" subdirectory was then deleted.
 
@@ -320,6 +421,11 @@ to use fixed "sp-encrypt-key.pem" and "sp-encrypt-cert.pem" files.
 The following files were modified to support the configuration expected by
 Reciprocal Borrowing. The original version of the files have a ".dist"
 extension.
+
+#### sp/Dockerfile
+
+A section was appended to the end of the stock Dockerfile to install
+Phusion Passenger and Ruby.
 
 #### sp/container_files/shibboleth/attribute-map.xml
 
@@ -371,13 +477,15 @@ To regenerate these files (which should not be necessary):
 $ docker run --rm --publish=443:443 --name borrow-local shib-sp-reciprocal-borrowing:latest
 ```
 
-4) Retrieve the metadata for the IdP:
+4) Retrieve the Shibboleth SP metadata and copy into the "idp" directory, so
+   that it available to the IdP:
 
 ```zsh
 $ curl --insecure https://borrow-local/Shibboleth.sso/Metadata > idp/config/shib-idp/conf/shib-sp.xml
 ```
 
-5) Copy the following files:
+5) Copy the following files into the "sp" directory, so that they will be used
+   by the SP:
 
 ```zsh
 $ docker cp borrow-local:/etc/shibboleth/sp-encrypt-cert.pem sp/container_files/shibboleth/
@@ -386,48 +494,12 @@ $ docker cp borrow-local:/etc/shibboleth/sp-signing-cert.pem sp/container_files/
 $ docker cp borrow-local:/etc/shibboleth/sp-signing-key.pem sp/container_files/shibboleth/
 ```
 
-6) Stop the "borrow-local" Docker container
+6) Stop the "borrow-local" Docker container.
 
-## Reciprocal Borrowing
-
-### Shibboleth SP changes
-
-### sp/Dockerfile
-
-A section was appended to the end of the stock Dockerfile to install
-Phusion Passenger and Ruby.
-
-## Helpful Commands
-
-The following command can be run in the "borrow-local" Docker container, which
-can be accessed by running:
+7) If necessary, delete the existing IdP Docker image:
 
 ```zsh
-$ docker exec -it borrow-local /bin/bash
+$ docker image rm reciprocal-borrowing-dev-env-shib-idp
 ```
 
-### Restart Apache
-
-To restart Apache after making changes to the Apache configuration, run:
-
-```bash
-borrow-local$ supervisorctl restart httpd
-```
-
-### Restart Passenger/reciprocal-borrowing
-
-The "reciprocal-borrowing" repository can be edited on the local machine, and
-the changes will be automatically propagated to the Docker container and
-reflected in the running Rails application, as in normal Rails development.
-
-Some Rails changes, such as changes to the configuration or internationalization
-files will require the Rails application to be restarted, which can be done
-by running the following command (in the "borrow-local" Docker container):
-
-```bash
-borrow-local$ passenger-config restart-app /root/reciprocal-borrowing
-```
-
-**Note:** Normal Rails development changes (i.e., changes to the application
-views and controllers) should be picked up automatically (as if running in the
-local development envir
+8) Rebuild the Shibboleth SP Docker image.
