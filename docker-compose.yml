@@ -30,7 +30,7 @@ services:
     networks:
       - reciprocal-borrowing-network
   borrow-local:
-    image: shib-sp-reciprocal-borrowing:latest
+    image: docker.lib.umd.edu/shib-sp-reciprocal-borrowing:ruby-3.2.2
     container_name: borrow-local
     ports:
       - '80:80'
@@ -39,10 +39,6 @@ services:
       - reciprocal-borrowing-network
     volumes:
       - '../reciprocal-borrowing:/root/reciprocal-borrowing'
-
-  #   image: 'YOUR_APPLICATION_IMAGE'
-  #   networks:
-  #     - my-network
 volumes:
   openldap_data:
     driver: local
