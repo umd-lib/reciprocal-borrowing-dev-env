@@ -153,6 +153,22 @@ borrow-local$ passenger-config restart-app /root/reciprocal-borrowing
 views and controllers) should be picked up automatically (as if running in the
 local development environment).
 
+## Known Issues
+
+The following are known issues with this “reciprocal-borrow-dev-env”
+implementation:
+
+* The user identifying attributes from LDAP (“cn”, “sn”, “givenName”,
+  “displayName”) are not passed to the Rails application by the
+  Shibboleth SP. Therefore the “Name”, “Principal Name”, and “Identifier” on
+  the Reciprocal Borrowing result page will all display “N/A”.
+
+* The Apache in the “borrow-local” Shibboleth SP container runs as “root”, and
+  hence the Phusion Passenger and “reciprocal-borrowing” application also run as
+  “root”. This is perfectly fine for a local development setup, but it likely
+  not ideal for a production deployment (which this repository is not intended
+  to provide).
+
 ## Shibboleth SP Docker Image Setup
 
 The "sp" subdirectory contains a snapshot (from
