@@ -86,14 +86,7 @@
     -->
 
     <!-- UMD Customization -->
-    <AttributeFilterPolicy id="example1">
-        <PolicyRequirementRule xsi:type="ANY" />
-
-        <AttributeRule attributeID="sn" permitAny="true" />
-        <AttributeRule attributeID="eduPersonScopedAffiliation" permitAny="true" />
-    </AttributeFilterPolicy>
-
-    <AttributeFilterPolicy id="example2">
+    <AttributeFilterPolicy id="reciprocal_borrowing_filter">
         <PolicyRequirementRule xsi:type="Value" value="is_eligible" />
         <AttributeRule attributeID="eduPersonEntitlement" permitAny="true" />
     </AttributeFilterPolicy>

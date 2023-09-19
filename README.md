@@ -1,7 +1,7 @@
 # reciprocal-borrowing-dev-env
 
 This repository provides a local environment, via Docker, for developing and
-testing the Reciporical Borrowing application
+testing the Reciprocal Borrowing application
 (<https://github.com/umd-lib/reciprocal-borrowing>).
 
 ## Provided Applications
@@ -79,7 +79,7 @@ stored in the "vendor" directory of the Reciprocal Borrowing application, so
 the gems will still be available after stopping and restarting tje Shibboleth SP
 "borrow-local"container.
 
-The gems are configured to use the "amd64" archictecture, and so are not
+The gems are configured to use the "amd64" architecture, and so are not
 directly usable on an M-series laptop, outside of the Docker container.
 
 ---
@@ -90,19 +90,18 @@ going to, go to:
 <https://borrow-local/>
 
 The browser may display a warning message related to unsigned certificates.
-Accept the self-signed cerificate, and the Reciprocal Borrowing home page will
-be shown.
+Accept the self-signed certificate, and (after a few 10s of seconds) the
+Reciprocal Borrowing home page will be shown.
 
-3.3) On the Reciprocal Borrowing home page, select any institution *except* for
-the "University of Maryland" as the lending instituion. The second
-Reciprocal Borrowing page will be shown.
+3.3) On the Reciprocal Borrowing home page, select any organization for
+as the lending organization. The second Reciprocal Borrowing page will be shown.
 
-3.4) On the second Reciprocal Borrowing page, select "University of Maryland" as
-the authenticating institution.
+3.4) On the second Reciprocal Borrowing page, select one of the other
+organizations as the authenticating institution.
 
-After selecting the authenticating insitution, the browser may display a
+After selecting the authenticating organization, the browser may display a
 warning message related to unsigned certificates. Accept the self-signed
-cerificate, and the login page from the IdP will be shown.
+certificate, and the login page from the IdP will be shown.
 
 3.5) On the login page, enter the username and password, such as:
 
@@ -169,7 +168,7 @@ The "docker-compose.yml" file has been modified to mount the local
 The Shibboleth SP Docker image should be recreated whenever:
 
 * The Ruby version used by the "reciprocal-borrowing" application is updated
-* As needed, to keep up with any Shibboleth SP or Phuson Passenger version
+* As needed, to keep up with any Shibboleth SP or Phusion Passenger version
   changes used in production.
 
 The following instructions use that the Kubernetes "build" environment to
@@ -194,7 +193,7 @@ $ docker buildx build --no-cache --progress=plain --builder kube  --load \
   -t docker.lib.umd.edu/shib-sp-reciprocal-borrowing:<TAG> sp/.
 ```
 
-For example, if the \<TAG> is "ruby-3.2.2" than the commmand would be:
+For example, if the \<TAG> is "ruby-3.2.2" than the command would be:
 
 ```zsh
 $ docker buildx build --no-cache --progress=plain --builder kube  --load \
@@ -293,7 +292,7 @@ $ docker volume rm reciprocal-borrowing-dev-env_openldap_data
 $ docker compose up
 ```
 
-### OpenLDAP Verfication
+### OpenLDAP Verification
 
 Verification that OpenLDAP is running can be done by running the following
 command:
@@ -351,25 +350,37 @@ automatically rebuilt with the changes:
 $ docker image rm reciprocal-borrowing-dev-env-shib-idp
 ```
 
-#### ldap.properties
-
 #### idp/config/shib-idp/conf/access-control.xml
 
-This file was constructed from the “conf/access-control.xml” file in the stock
-Docker image (when it runs for the first time), with the “AccessByAdminUser”
-stanza uncommented, and the “customuser” added.
+The IP Address CIDR '0.0.0.0/0' was added to the "AccessByIPAddress"
+stanza, to allow connections from any IPv4 address.
 
-Also, the IP Address CIDR '0.0.0.0/0' was added to the "AccessByIPAddress"
-stanza, to allow connections from any IP address.
+#### idp/config/shib-idp/conf/attribute-filter.xml
+
+Added a "reciprocal_borrowing_filter" AttributeFilterPolicy that only releases
+the "eduPersonEntitlement" attribute for the "is_eligible" user.
 
 #### idp/config/shib-idp/conf/attribute-resolver.xml
 
-Modified to supply "eduPersonEntitlement" and "eduPersonScopedAffiliation"
-attributes as static attributes, instead of from LDAP.
+Modified to supply "eduPersonEntitlement" attribute as a static attribute,
+instead of from LDAP.
+
+An "eduPersonEntitlement" attribute with a value of
+`https://borrow.btaa.org/reciprocalborrower` indicates that a user is eligible
+to borrow.
+
+The "reciprocal_borrowing_filter" AttributeFilterPolicy in
+"idp/config/shib-idp/conf/attribute-filter.xml" only releases the attribute for
+the "is_eligible" user.
 
 #### idp/config/shib-idp/metadata/idp-metadata.xml
 
 Modified the IDP service endpoints to use port 1443.
+
+#### idp/config/shib-idp/conf/ldap.properties
+
+Modified to support connecting to the OpenLDAP container, and to reflect the
+user attributes produced by LDAP.
 
 #### idp/config/shib-idp/conf/metadata-providers.xml
 
@@ -469,7 +480,7 @@ To regenerate these files (which should not be necessary):
 ```
 
 2) Rebuild the "shib-sp-reciprocal-borrowing" (see the
-   "Building the SP/Recirpocal Borrowing Docker image" section above.
+   "Building the SP/Reciprocal Borrowing Docker image" section above.
 
 3) Run the "shib-sp-reciprocal-borrowing" Docker image:
 

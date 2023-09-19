@@ -156,11 +156,9 @@
         <InputDataConnector ref="myLDAP" attributeNames="eduPersonPrincipalNamePrior"/>
     </AttributeDefinition>
 
-    <!-- UMD Customization -->
-    <AttributeDefinition xsi:type="Scoped" id="eduPersonScopedAffiliation" scope="%{idp.scope}">
-        <InputDataConnector ref="staticAttributes" attributeNames="eduPersonAffiliation"/>
+        <AttributeDefinition xsi:type="Scoped" id="eduPersonScopedAffiliation" scope="%{idp.scope}">
+        <InputDataConnector ref="myLDAP" attributeNames="eduPersonAffiliation"/>
     </AttributeDefinition>
-    <!-- End UMD Customizatin -->
 
     <AttributeDefinition xsi:type="Simple" id="eduPersonAssurance">
         <InputDataConnector ref="myLDAP" attributeNames="eduPersonAssurance"/>
@@ -192,14 +190,8 @@
 
     <!-- UMD Customization -->
     <DataConnector id="staticAttributes" xsi:type="Static">
-        <Attribute id="eduPersonAffiliation">
-            <Value>member</Value>
-        </Attribute>
         <Attribute id="eduPersonEntitlement">
             <Value>https://borrow.btaa.org/reciprocalborrower</Value>
-        </Attribute>
-        <Attribute id="eduPersonScopedAffiliation">
-          <Value>foobarbaz</Value>
         </Attribute>
     </DataConnector>
     <!-- End UMD Customization -->

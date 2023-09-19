@@ -38,9 +38,7 @@
         <entry key="AccessByAdminUser">
             <bean parent="shibboleth.PredicateAccessControl">
                 <constructor-arg>
-                    <!-- UMD Customization -->
-                    <bean parent="shibboleth.Conditions.SubjectName" c:collection="#{{'jdoe','customuser'}}" />
-                    <!-- End UMD Customization -->
+                    <bean parent="shibboleth.Conditions.SubjectName" c:collection="#{{'jdoe'}}" />
                 </constructor-arg>
             </bean>
         </entry>
