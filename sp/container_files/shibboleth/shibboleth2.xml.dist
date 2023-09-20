@@ -10,11 +10,9 @@
     -->
 
     <!-- The ApplicationDefaults element is where most of Shibboleth's SAML bits are defined. -->
-    <!-- UMD Customization -->
-    <ApplicationDefaults entityID="https://borrow-local/shibboleth"
+    <ApplicationDefaults entityID="https://sp.example.org/shibboleth"
         REMOTE_USER="eppn subject-id pairwise-id persistent-id"
         cipherSuites="DEFAULT:!EXP:!LOW:!aNULL:!eNULL:!DES:!IDEA:!SEED:!RC4:!3DES:!kRSA:!SSLv2:!SSLv3:!TLSv1:!TLSv1.1">
-    <!-- End UMD Customization -->
 
         <!--
         Controls session lifetimes, address checks, cookie handling, and the protocol handlers.
@@ -24,23 +22,19 @@
         restrictions. Note that while we default checkAddress to "false", this makes an assertion
         stolen in transit easier for attackers to misuse.
         -->
-       <!-- UMD Customization 'redirectLimit="none"' -->
        <Sessions lifetime="28800" timeout="3600" relayState="ss:mem"
                   checkAddress="false" handlerSSL="true" cookieProps="https"
-                  redirectLimit="none">
-       <!-- End UMD Customization -->
+                  redirectLimit="exact">
 
             <!--
             Configures SSO for a default IdP. To properly allow for >1 IdP, remove
             entityID property and adjust discoveryURL to point to discovery service.
             You can also override entityID on /Login query string, or in RequestMap/htaccess.
             -->
-            <!-- UMD Customization -->
-            <SSO entityID="https://shib-idp/idp/shibboleth"
+            <SSO entityID="https://idp.example.org/idp/shibboleth"
                  discoveryProtocol="SAMLDS" discoveryURL="https://ds.example.org/DS/WAYF">
               SAML2
             </SSO>
-            <!-- End UMD Customization -->
 
             <!-- SAML and local-only logout. -->
             <Logout>SAML2 Local</Logout>
@@ -55,9 +49,7 @@
             <Handler type="Status" Location="/Status" acl="127.0.0.1 ::1"/>
 
             <!-- Session diagnostic service. -->
-            <!-- UMD Customization -->
-            <Handler type="Session" Location="/Session" showAttributeValues="true"/>
-            <!-- End UMD Customization -->
+            <Handler type="Session" Location="/Session" showAttributeValues="false"/>
 
             <!-- JSON feed of discovery information. -->
             <Handler type="DiscoveryFeed" Location="/DiscoFeed"/>
@@ -73,14 +65,14 @@
             styleSheet="/shibboleth-sp/main.css"/>
 
         <!-- Example of locally maintained metadata. -->
-        <!-- UMD Customization -->
-        <MetadataProvider type="XML" validate="true" path="/etc/shibboleth/idp-metadata.xml"/>
-        <!-- End UMD Customization -->
+        <!--
+        <MetadataProvider type="XML" validate="true" path="partner-metadata.xml"/>
+        -->
 
         <!-- Example of remotely supplied batch of signed metadata. -->
         <!--
         <MetadataProvider type="XML" validate="true"
-              url="http://federation.org/federation-metadata.xml"
+	            url="http://federation.org/federation-metadata.xml"
               backingFilePath="federation-metadata.xml" maxRefreshDelay="7200">
             <MetadataFilter type="RequireValidUntil" maxValidityInterval="2419200"/>
             <MetadataFilter type="Signature" certificate="fedsigner.pem" verifyBackup="false"/>
@@ -94,7 +86,7 @@
         <!-- Example of remotely supplied "on-demand" signed metadata. -->
         <!--
         <MetadataProvider type="MDQ" validate="true" cacheDirectory="mdq"
-                baseUrl="http://mdq.federation.org" ignoreTransport="true">
+	            baseUrl="http://mdq.federation.org" ignoreTransport="true">
             <MetadataFilter type="RequireValidUntil" maxValidityInterval="2419200"/>
             <MetadataFilter type="Signature" certificate="mdqsigner.pem" />
         </MetadataProvider>
