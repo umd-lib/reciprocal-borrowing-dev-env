@@ -50,20 +50,26 @@ created, containing a Ruby version compatible with the Reciprocal Borrowing
 application being developed. See below for information about creating
 a Shibboleth SP Docker image.
 
-3.1) Start the Docker stack:
+3.1) Switch into the "reciprocal-borrowing-dev-env" directory:
+
+```zsh
+$ cd reciprocal-borrowing-dev-env
+```
+
+3.2) Start the Docker stack:
 
 ```zsh
 $ docker compose up
 ```
 
-3.2) Once the Docker stack has started, run a Bash shell in the "borrow-local"
+3.3) Once the Docker stack has started, run a Bash shell in the "borrow-local"
 container:
 
 ```zsh
 $ docker exec -it borrow-local /bin/bash
 ```
 
-3.3) In the "borrow-local" container, run the following commands to install the
+3.4) In the "borrow-local" container, run the following commands to install the
 gems needed for the Reciprocal Borrowing application:
 
 ```bash
