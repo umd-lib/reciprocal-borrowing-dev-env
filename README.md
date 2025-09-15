@@ -90,7 +90,7 @@ directly usable on an M-series laptop, outside of the Docker container.
 
 ---
 
-3.2) Access the application in a web browser by
+3.5) Access the application in a web browser by
 going to, go to:
 
 <https://borrow-local/>
@@ -99,17 +99,14 @@ The browser may display a warning message related to unsigned certificates.
 Accept the self-signed certificate, and (after a few 10s of seconds) the
 Reciprocal Borrowing home page will be shown.
 
-3.3) On the Reciprocal Borrowing home page, select any organization for
-as the lending organization. The second Reciprocal Borrowing page will be shown.
-
-3.4) On the second Reciprocal Borrowing page, select one of the other
-organizations as the authenticating institution.
+3.6) On the Reciprocal Borrowing home page, select one of the organizations as
+the authenticating organization.
 
 After selecting the authenticating organization, the browser may display a
 warning message related to unsigned certificates. Accept the self-signed
 certificate, and the login page from the IdP will be shown.
 
-3.5) On the login page, enter the username and password, such as:
+3.7) On the login page, enter the username and password, such as:
 
 * Username: `is_eligible`
 * Password: `password`
@@ -117,7 +114,7 @@ certificate, and the login page from the IdP will be shown.
 and left-click the "Login" button. See the "Custom Users" section below for
 additional users and credentials.
 
-5.5) The Reciprocal Borrowing result page will be shown indicating that the user
+3.8) The Reciprocal Borrowing result page will be shown indicating that the user
 is able to borrow.
 
 Development can be done in the "reciprocal-borrowing" directory on the local
