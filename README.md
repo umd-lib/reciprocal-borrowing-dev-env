@@ -77,6 +77,8 @@ borrow-local$ cd /root/reciprocal-borrowing
 borrow-local$ bundle config set force_ruby_platform true
 borrow-local$ bundle config set --local path 'vendor/bundle'
 borrow-local$ bundle install
+borrow-local$ yarn install
+borrow-local$ yarn watch:css
 ```
 
 ---

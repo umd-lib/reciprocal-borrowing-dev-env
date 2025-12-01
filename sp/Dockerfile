@@ -100,8 +100,8 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | b
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" && \
     nvm install 18
 
-# Install yarn
-RUN npm install -g yarn
+# Install yarn and nodemon for local development
+RUN npm install -g yarn nodemon
 
 # Set permissions to /root to enable Apache to access it
 RUN chmod 755 /root

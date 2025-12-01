@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Ensure that the /run/shibboleth directory exists for the Shibboleth socket
+mkdir -p /run/shibboleth
+
 #for passed-in env vars, remove spaces and replace any ; with : in usertoken env var since we will use ; as a delimiter
 export USERTOKEN="${USERTOKEN//;/:}"
 export USERTOKEN="${USERTOKEN// /}"
