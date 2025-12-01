@@ -38,7 +38,7 @@ RUN openssl req -new -nodes -newkey rsa:2048 -subj "/commonName=localhost.locald
 RUN openssl x509 -req -days 1825 -in localhost.csr -signkey /etc/pki/tls/private/localhost.key -out /etc/pki/tls/certs/localhost.crt
 RUN sed -i '/^[[:space:]]*CustomLog/s/^/#/' /etc/httpd/conf/httpd.conf
 
-# add a basic page to shibb's default protected directory
+# add a basic page to shibd's default protected directory
 RUN mkdir -p /var/www/html/secure/; mkdir -p /opt/tier/
 ADD container_files/httpd/index.html /var/www/html/secure/
 
@@ -93,6 +93,15 @@ RUN yum update -y && \
     yum install -y mod_passenger || { yum-config-manager --enable cr && sudo yum install -y mod_passenger ; } && \
     yum clean all
 
+# Install NVM and Node
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash && \
+    export NVM_DIR="$HOME/.nvm" && \
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" && \
+    nvm install 18
+
+# Install yarn
+RUN npm install -g yarn
+
 # Set permissions to /root to enable Apache to access it
 RUN chmod 755 /root
-
