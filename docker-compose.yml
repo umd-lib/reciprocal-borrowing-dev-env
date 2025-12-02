@@ -32,6 +32,7 @@ services:
   borrow-local:
     image: docker.lib.umd.edu/shib-sp-reciprocal-borrowing:ruby-3.2.2-rails-8.1
     container_name: borrow-local
+    platform: linux/amd64
     ports:
       - '80:80'
       - '443:443'
