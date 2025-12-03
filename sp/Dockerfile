@@ -79,13 +79,17 @@ RUN yum update -y && \
     yum-config-manager --enable epel && \
     yum clean all
 
+# Make sure RUBY_VERSION matches the Ruby version in .ruby-version of
+# umd-lib/reciprocal-borrowing
+ARG RUBY_VERSION=3.4.7
+
 # Install rbenv and ruby
 RUN  curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash && \
     echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc && \
     echo 'eval "$(rbenv init -)"' >> ~/.bashrc && \
     source ~/.bashrc && \
-    rbenv install 3.2.2 && \
-    rbenv global 3.2.2
+    rbenv install ${RUBY_VERSION} && \
+    rbenv global ${RUBY_VERSION}
 
 # Install Passenger Phusion
 RUN yum update -y && \
@@ -93,15 +97,18 @@ RUN yum update -y && \
     yum install -y mod_passenger || { yum-config-manager --enable cr && sudo yum install -y mod_passenger ; } && \
     yum clean all
 
+ARG NODE_VERSION=24
+ARG YARN_VERSION=1.22.22
+
 # Install NVM and Node
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash && \
     export NVM_DIR="$HOME/.nvm" && \
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" && \
-    nvm install 18
+    nvm install ${NODE_VERSION}
 
 # Install yarn and nodemon for local development
-RUN npm install -g yarn nodemon
+RUN npm install -g yarn@${YARN_VERSION} nodemon
 
 # Set permissions to /root to enable Apache to access it
 RUN chmod 755 /root
